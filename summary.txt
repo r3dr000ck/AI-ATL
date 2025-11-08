@@ -1,0 +1,5 @@
+- Close prices show a clear falling trend, moving from the 773s down to the 769s, with both 5m and 15m returns generally negative.
+- The initial decline in close prices and RSI-7 was sharp, indicating acceleration, which then flattened as prices stabilized and RSI-7 began a slow recovery.
+- All series exhibit significant choppiness, with frequent up and down movements in close prices and volatile, direction-switching returns.
+- The provided statistics (mean, min, max, last) consistently align with the observed patterns in the arrays, confirming the downward trend and volatility.
+- While the overall trend is down, the most recent 5m return is positive, and RSI-7 has recovered from oversold conditions, suggesting some recent upward momentum or stabilization.

@@ -47,6 +47,62 @@ export interface PositionsResponse {
   capital: number;
 }
 
+export interface PriceMovement {
+  ticker: string;
+  name?: string;
+  previous_close: number;
+  current_price: number;
+  change: number;
+  change_pct: number;
+  volume: number;
+}
+
+export interface DailyMovementsResponse {
+  jumps: PriceMovement[];
+  dips: PriceMovement[];
+  timestamp: string;
+}
+
+export interface BigMoversResponse {
+  movers: PriceMovement[];
+  timestamp: string;
+}
+
+export interface NewsItem {
+  id: number;
+  headline: string;
+  summary: string;
+  source: string;
+  url: string;
+  image: string;
+  datetime: number;
+  datetime_formatted?: string;
+  category: string;
+  related: string;
+}
+
+export interface MarketNewsResponse {
+  news: NewsItem[];
+  timestamp: string;
+  source: string;
+}
+
+export interface EquityCurvePoint {
+  time: number;
+  equity: number;
+  change_pct: number;
+  timestamp: number;
+  normalized: number;
+}
+
+export interface EquityCurveResponse {
+  equity_curve: EquityCurvePoint[];
+  current_equity: number;
+  starting_equity: number;
+  total_pnl: number;
+  timestamp: string;
+}
+
 class APIClient {
   private baseURL: string;
 
@@ -95,6 +151,22 @@ class APIClient {
 
   async getCapital(): Promise<CapitalInfo> {
     return this.request<CapitalInfo>('/execution/capital');
+  }
+
+  async getDailyMovements(): Promise<DailyMovementsResponse> {
+    return this.request<DailyMovementsResponse>('/market/daily-movements');
+  }
+
+  async getBigMovers(): Promise<BigMoversResponse> {
+    return this.request<BigMoversResponse>('/market/big-movers');
+  }
+
+  async getMarketNews(limit: number = 20, category: string = 'general'): Promise<MarketNewsResponse> {
+    return this.request<MarketNewsResponse>(`/market/news?limit=${limit}&category=${category}`);
+  }
+
+  async getEquityCurve(): Promise<EquityCurveResponse> {
+    return this.request<EquityCurveResponse>('/market/equity-curve');
   }
 }
 
