@@ -40,16 +40,16 @@ export default function DashboardPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // if (loading && !health) {
-  //   return (
-  //     <div className="flex items-center justify-center min-h-screen bg-[var(--background)]">
-  //       <div className="flex flex-col items-center gap-4">
-  //         <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-  //         <div className="text-xl text-[var(--foreground)] font-medium">Initializing Trading System...</div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  if (loading && !health) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[var(--background)]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="text-xl text-[var(--foreground)] font-medium">Initializing Trading System...</div>
+        </div>
+      </div>
+    );
+  }
 
   if (error) {
     return (
