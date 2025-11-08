@@ -10,7 +10,7 @@ from .ensemble import EnsembleScorer
 from .model_trainer import ModelTrainer
 
 __all__ = [
-    'PUpModel',
+    'PUpModel', 
     'PDropModel',
     'DExtModel',
     'RVolModel',
