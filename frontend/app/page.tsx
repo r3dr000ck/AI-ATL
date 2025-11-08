@@ -4,6 +4,13 @@ import { useEffect, useState } from 'react';
 import { apiClient, HealthStatus, PositionsResponse } from '@/lib/api-client';
 import { useAuth } from '@/lib/auth-context';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+
+// Dynamically import Dither to avoid SSR issues with Three.js
+const Dither = dynamic(() => import('@/components/Dither'), {
+  ssr: false,
+  loading: () => null
+});
 
 export default function DashboardPage() {
   const { user, logout, isAuthenticated } = useAuth();
@@ -87,19 +94,26 @@ export default function DashboardPage() {
             <p className="text-gray-400">Real-time algorithmic trading dashboard</p>
 =======
     <div className="min-h-screen bg-background text-foreground p-4 md:p-8">
-      {/* Animated background gradient */}
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-0 -left-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 -right-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
-      </div>
+      {/* Dithered Waves Background */}
+      <Dither
+        waveSpeed={0.03}
+        waveFrequency={2.5}
+        waveAmplitude={0.35}
+        waveColor={[0.2, 0.3, 0.5]}
+        colorNum={6}
+        pixelSize={3}
+        disableAnimation={false}
+        enableMouseInteraction={true}
+        mouseRadius={0.8}
+      />
 
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
         <div className="mb-8 md:mb-12 fade-in-up">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <h1 className="text-4xl md:text-5xl font-bold mb-2 gradient-text">
-                ValueCell AI Trader
+                Futures AI Trader
               </h1>
               <p className="text-[var(--foreground-secondary)] text-lg">
                 LLM-Powered Algorithmic Trading Platform
@@ -161,6 +175,7 @@ export default function DashboardPage() {
 >>>>>>> d0ae0d8b4d189182f0c89ac010d1daf7deab1dc6
           </div>
 
+<<<<<<< HEAD
 <<<<<<< HEAD
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <StatusCard
@@ -256,6 +271,8 @@ export default function DashboardPage() {
           <div className="mt-4 text-center text-gray-500 text-sm">
             Last updated: {health?.timestamp ? new Date(health.timestamp).toLocaleString() : '-'} | Events cached: {health?.num_events || 0}
 =======
+=======
+>>>>>>> 23f2be57215fb59c814f1ee515aef881af82971b
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8 md:mb-12">
           <MetricCard
@@ -288,6 +305,47 @@ export default function DashboardPage() {
           />
         </div>
 
+<<<<<<< HEAD
+=======
+        {/* Market Overview */}
+        <div className="glass-card rounded-2xl p-6 md:p-8 mb-8 fade-in-up">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold flex items-center gap-3">
+              <span className="text-3xl">📈</span>
+              Market Overview
+            </h2>
+            <span className="text-xs md:text-sm text-[var(--foreground-secondary)]">
+              Simulated intraday movement
+            </span>
+          </div>
+
+          <div className="relative h-32 md:h-40 overflow-hidden rounded-xl bg-[var(--background-secondary)] border border-[var(--border-color)] px-4 py-3 flex items-end gap-1">
+            {Array.from({ length: 40 }).map((_, idx) => {
+              const height =
+                40 + Math.sin(idx / 2) * 20 + (idx % 5) * 4;
+              const clampedHeight = Math.max(10, Math.min(90, height));
+              const opacity = 0.4 + (idx % 5) * 0.1;
+
+              return (
+                <div
+                  key={idx}
+                  className="flex-1 bg-gradient-to-t from-blue-500/40 to-purple-400/70 rounded-t-full"
+                  style={{
+                    height: `${clampedHeight}%`,
+                    opacity,
+                  }}
+                />
+              );
+            })}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--background)]/80 via-transparent" />
+          </div>
+
+          <p className="mt-4 text-xs md:text-sm text-[var(--foreground-secondary)]">
+            Intraday equity curve, scaled from recent P&amp;L for visualization.
+          </p>
+        </div>
+
+>>>>>>> 23f2be57215fb59c814f1ee515aef881af82971b
         {/* Quick Actions */}
         <div className="glass-card rounded-2xl p-6 md:p-8 mb-8 fade-in-up">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
@@ -444,3 +502,27 @@ function ActionButton({ href, title, description, icon, color }: {
     </a>
   );
 }
+<<<<<<< HEAD
+=======
+
+// Table Skeleton Component for loading state
+function TableSkeleton() {
+  return (
+    <div className="animate-pulse">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <div
+          key={i}
+          className="flex gap-4 p-4 border-b border-[var(--border-color)] items-center"
+        >
+          <div className="h-4 bg-[var(--background-secondary)] rounded w-20" />
+          <div className="h-4 bg-[var(--background-secondary)] rounded flex-1" />
+          <div className="h-4 bg-[var(--background-secondary)] rounded w-24" />
+          <div className="h-4 bg-[var(--background-secondary)] rounded w-24" />
+          <div className="h-4 bg-[var(--background-secondary)] rounded w-24" />
+          <div className="h-4 bg-[var(--background-secondary)] rounded w-24" />
+        </div>
+      ))}
+    </div>
+  );
+}
+>>>>>>> 23f2be57215fb59c814f1ee515aef881af82971b

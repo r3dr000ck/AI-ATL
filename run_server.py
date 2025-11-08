@@ -12,7 +12,7 @@ import secrets
 import hashlib
 
 # Create FastAPI app
-app = FastAPI(title="ValueCell AI Trader", version="1.0.0")
+app = FastAPI(title="Futures AI Trader", version="1.0.0")
 
 # Add CORS middleware
 app.add_middleware(
@@ -30,29 +30,34 @@ MOCK_CAPITAL = 1000.0
 # Mock user database (in-memory for demo)
 MOCK_USERS = {}
 
+
 # Auth models
 class SignupRequest(BaseModel):
     email: str
     password: str
     name: str
 
+
 class LoginRequest(BaseModel):
     email: str
     password: str
+
 
 class AuthResponse(BaseModel):
     token: str
     user: dict
     message: str
 
+
 @app.get("/")
 async def root():
     return {
-        "name": "ValueCell AI Trader",
+        "name": "Futures AI Trader",
         "version": "1.0.0",
         "status": "running",
-        "message": "Backend API is running! Connect your frontend to see it in action."
+        "message": "Backend API is running! Connect your frontend to see it in action.",
     }
+
 
 @app.get("/health")
 async def health():
@@ -61,23 +66,20 @@ async def health():
         "timestamp": datetime.now().isoformat(),
         "broker_capital": MOCK_CAPITAL,
         "num_positions": len(MOCK_POSITIONS),
-        "num_events": 42  # Mock event count
+        "num_events": 42,  # Mock event count
     }
+
 
 @app.get("/monitor/positions")
 async def get_positions():
-    return {
-        "positions": MOCK_POSITIONS,
-        "total_exposure": 0.0
-    }
+    return {"positions": MOCK_POSITIONS, "total_exposure": 0.0}
+
 
 @app.get("/execution/positions")
 async def get_execution_positions():
     """Alternate endpoint for positions"""
-    return {
-        "positions": MOCK_POSITIONS,
-        "total_exposure": 0.0
-    }
+    return {"positions": MOCK_POSITIONS, "total_exposure": 0.0}
+
 
 @app.post("/execution/execute")
 async def execute_trade(trade_data: dict):
@@ -89,13 +91,15 @@ async def execute_trade(trade_data: dict):
         "action": trade_data.get("action", "BUY"),
         "quantity": trade_data.get("quantity", 10),
         "price": 150.00,  # Mock price
-        "message": "Trade executed successfully (DEMO MODE)"
+        "message": "Trade executed successfully (DEMO MODE)",
     }
+
 
 # Helper function to hash passwords
 def hash_password(password: str) -> str:
     """Simple password hashing for demo purposes"""
     return hashlib.sha256(password.encode()).hexdigest()
+
 
 # Auth endpoints
 @app.post("/auth/signup")
@@ -112,7 +116,7 @@ async def signup(request: SignupRequest):
         "email": request.email,
         "name": request.name,
         "password_hash": hash_password(request.password),
-        "created_at": datetime.now().isoformat()
+        "created_at": datetime.now().isoformat(),
     }
 
     # Generate auth token
@@ -120,13 +124,10 @@ async def signup(request: SignupRequest):
 
     return {
         "token": token,
-        "user": {
-            "id": user_id,
-            "email": request.email,
-            "name": request.name
-        },
-        "message": "Account created successfully"
+        "user": {"id": user_id, "email": request.email, "name": request.name},
+        "message": "Account created successfully",
     }
+
 
 @app.post("/auth/login")
 async def login(request: LoginRequest):
@@ -146,17 +147,14 @@ async def login(request: LoginRequest):
 
     return {
         "token": token,
-        "user": {
-            "id": user["id"],
-            "email": user["email"],
-            "name": user["name"]
-        },
-        "message": "Login successful"
+        "user": {"id": user["id"], "email": user["email"], "name": user["name"]},
+        "message": "Login successful",
     }
+
 
 if __name__ == "__main__":
     print("=" * 70)
-    print("🚀 ValueCell AI Trader - Backend Server")
+    print("🚀 Futures AI Trader - Backend Server")
     print("=" * 70)
     print(f"\n✨ Server starting on http://localhost:8000")
     print(f"📊 API Documentation: http://localhost:8000/docs")
@@ -166,9 +164,4 @@ if __name__ == "__main__":
     print("=" * 70)
     print()
 
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=8000,
-        log_level="info"
-    )
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")

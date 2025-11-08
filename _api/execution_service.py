@@ -19,15 +19,19 @@ logger = logging.getLogger(__name__)
 
 class TradeRequest(BaseModel):
     """Trade execution request"""
+
     ticker: str = Field(..., description="Ticker symbol")
     action: str = Field(..., description="BUY or SELL")
     s_final: Optional[float] = Field(None, ge=0, le=1, description="Investment score")
-    quantity: Optional[float] = Field(None, gt=0, description="Optional quantity override")
+    quantity: Optional[float] = Field(
+        None, gt=0, description="Optional quantity override"
+    )
     reason: str = Field("manual", description="Reason for trade")
 
 
 class TradeResponse(BaseModel):
     """Trade execution response"""
+
     success: bool
     order_id: Optional[str] = None
     ticker: str
@@ -89,7 +93,7 @@ class ExecutionService:
             return {
                 "positions": [p.dict() for p in positions],
                 "total_exposure": self.broker.get_total_exposure(),
-                "capital": self.broker.get_capital()
+                "capital": self.broker.get_capital(),
             }
 
         @self.app.get("/capital")
@@ -98,7 +102,8 @@ class ExecutionService:
             return {
                 "available_capital": self.broker.get_capital(),
                 "total_exposure": self.broker.get_total_exposure(),
-                "total_equity": self.broker.get_capital() + self.broker.get_total_exposure()
+                "total_equity": self.broker.get_capital()
+                + self.broker.get_total_exposure(),
             }
 
     async def _execute_buy(self, request: TradeRequest) -> TradeResponse:
@@ -113,35 +118,32 @@ class ExecutionService:
                 action="BUY",
                 quantity=0,
                 message=f"Already have position in {request.ticker}",
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
         # Size position
         if request.quantity:
             target_notional = request.quantity * 100  # Assume $100 price
             from ..storage.schemas import Allocation
+
             allocation = Allocation(
                 ticker=request.ticker,
                 target_notional=target_notional,
                 target_quantity=request.quantity,
                 s_final=request.s_final or 0.6,
-                reason=request.reason
+                reason=request.reason,
             )
         else:
             if not request.s_final:
                 raise HTTPException(400, "Must provide either quantity or s_final")
 
             current_exposures = {
-                p.ticker: p.quantity * p.entry_price
-                for p in positions
+                p.ticker: p.quantity * p.entry_price for p in positions
             }
 
             capital = self.broker.get_capital() + self.broker.get_total_exposure()
             allocation = self.sizer.size_position(
-                request.ticker,
-                request.s_final,
-                capital,
-                current_exposures
+                request.ticker, request.s_final, capital, current_exposures
             )
 
             if not allocation or allocation.target_notional <= 0:
@@ -151,17 +153,23 @@ class ExecutionService:
                     action="BUY",
                     quantity=0,
                     message="Position size too small or caps exceeded",
-                    timestamp=datetime.now()
+                    timestamp=datetime.now(),
                 )
 
         # Note: In real implementation, would get current price from market data
         # For now, use placeholder
         from ..storage.schemas import PriceBar
+
         current_bar = PriceBar(
             ticker=request.ticker,
             ts=datetime.now(),
-            open=100, high=101, low=99, close=100,
-            volume=1000000, vwap=100, spread_bps=5
+            open=100,
+            high=101,
+            low=99,
+            close=100,
+            volume=1000000,
+            vwap=100,
+            spread_bps=5,
         )
 
         # Create and execute order
@@ -173,12 +181,12 @@ class ExecutionService:
                 action="BUY",
                 quantity=0,
                 message="Order creation failed (spread too wide?)",
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
         report = self.broker.submit_order(order, current_bar)
 
-        if report.status == 'filled':
+        if report.status == "filled":
             # Create position
             stop_price = report.filled_price * (1 - self.config.risk.stop_pct)
             tp_price = report.filled_price * (1 + self.config.risk.tp_pct)
@@ -191,8 +199,9 @@ class ExecutionService:
                 entry_time=datetime.now(),
                 stop_price=stop_price,
                 tp_price=tp_price,
-                timeout_time=datetime.now() + timedelta(days=self.config.risk.timeout_days),
-                s_final_entry=request.s_final or 0.6
+                timeout_time=datetime.now()
+                + timedelta(days=self.config.risk.timeout_days),
+                s_final_entry=request.s_final or 0.6,
             )
 
             self.broker.add_position(position)
@@ -205,7 +214,7 @@ class ExecutionService:
                 quantity=report.filled_quantity,
                 price=report.filled_price,
                 message=f"Buy order filled at ${report.filled_price:.2f}",
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
         else:
             return TradeResponse(
@@ -214,7 +223,7 @@ class ExecutionService:
                 action="BUY",
                 quantity=0,
                 message=f"Order failed: {report.status}",
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
     async def _execute_sell(self, request: TradeRequest) -> TradeResponse:
@@ -229,30 +238,34 @@ class ExecutionService:
                 action="SELL",
                 quantity=0,
                 message=f"No position in {request.ticker}",
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
         quantity = request.quantity or position.quantity
 
         # Create market data (placeholder)
         from ..storage.schemas import PriceBar
+
         current_bar = PriceBar(
             ticker=request.ticker,
             ts=datetime.now(),
-            open=100, high=101, low=99, close=100,
-            volume=1000000, vwap=100, spread_bps=5
+            open=100,
+            high=101,
+            low=99,
+            close=100,
+            volume=1000000,
+            vwap=100,
+            spread_bps=5,
         )
 
         # Create and execute exit order
         order = self.order_manager.create_exit_order(
-            request.ticker,
-            quantity,
-            current_bar
+            request.ticker, quantity, current_bar
         )
 
         report = self.broker.submit_order(order, current_bar)
 
-        if report.status == 'filled':
+        if report.status == "filled":
             # Remove position if fully closed
             if quantity >= position.quantity:
                 self.broker.remove_position(request.ticker)
@@ -265,7 +278,7 @@ class ExecutionService:
                 quantity=report.filled_quantity,
                 price=report.filled_price,
                 message=f"Sell order filled at ${report.filled_price:.2f}",
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
         else:
             return TradeResponse(
@@ -274,5 +287,5 @@ class ExecutionService:
                 action="SELL",
                 quantity=0,
                 message=f"Order failed: {report.status}",
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )

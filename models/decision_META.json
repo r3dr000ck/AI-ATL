@@ -1,0 +1,5 @@
+{
+  "action": "WAIT",
+  "confidence": 0.9,
+  "rationale": "No numeric data (e.g., price, volume, indicators) was provided to analyze. Cannot make a BUY or SELL decision. Waiting for data input."
+}

@@ -29,9 +29,7 @@ class GovWatchConnector:
         self.base_url = "https://api.capitoltrades.com"  # Example API
 
     def fetch_events(
-            self,
-            since_ts: datetime,
-            officials: Optional[List[str]] = None
+        self, since_ts: datetime, officials: Optional[List[str]] = None
     ) -> List[TextEvent]:
         """
         Fetch government official trading activity
@@ -50,13 +48,10 @@ class GovWatchConnector:
             # For now, demonstrate structure
 
             # Example: Fetch recent trades
-            params = {
-                'since': since_ts.isoformat(),
-                'limit': 100
-            }
+            params = {"since": since_ts.isoformat(), "limit": 100}
 
             if self.api_key:
-                headers = {'Authorization': f'Bearer {self.api_key}'}
+                headers = {"Authorization": f"Bearer {self.api_key}"}
             else:
                 headers = {}
 
@@ -66,15 +61,15 @@ class GovWatchConnector:
             for trade in trades:
                 try:
                     # Parse trade data
-                    ticker = trade.get('ticker', '').upper()
+                    ticker = trade.get("ticker", "").upper()
                     if not ticker:
                         continue
 
-                    official_name = trade.get('official_name', 'Unknown')
-                    transaction_type = trade.get('transaction_type', 'Unknown')
-                    amount_range = trade.get('amount_range', 'Unknown')
-                    disclosure_date = trade.get('disclosure_date')
-                    transaction_date = trade.get('transaction_date')
+                    official_name = trade.get("official_name", "Unknown")
+                    transaction_type = trade.get("transaction_type", "Unknown")
+                    amount_range = trade.get("amount_range", "Unknown")
+                    disclosure_date = trade.get("disclosure_date")
+                    transaction_date = trade.get("transaction_date")
 
                     # Filter by officials if specified
                     if officials and official_name not in officials:
@@ -114,7 +109,7 @@ class GovWatchConnector:
                         event_type=f"official_trade_{transaction_type.lower()}",
                         sentiment_raw=sentiment,
                         confidence=0.75,  # Official trades are factual
-                        novelty=0.85  # High novelty for official trades
+                        novelty=0.85,  # High novelty for official trades
                     )
 
                     events.append(event)
@@ -149,10 +144,7 @@ class GovWatchConnector:
         return []
 
     def _analyze_official_trade_sentiment(
-            self,
-            transaction_type: str,
-            amount_range: str,
-            official_name: str
+        self, transaction_type: str, amount_range: str, official_name: str
     ) -> float:
         """
         Analyze sentiment of official trade
@@ -163,19 +155,19 @@ class GovWatchConnector:
         sentiment = 0.0
 
         # Base sentiment from transaction type
-        if transaction_type.upper() == 'BUY' or 'PURCHASE' in transaction_type.upper():
+        if transaction_type.upper() == "BUY" or "PURCHASE" in transaction_type.upper():
             sentiment = 0.3
-        elif transaction_type.upper() == 'SELL' or 'SALE' in transaction_type.upper():
+        elif transaction_type.upper() == "SELL" or "SALE" in transaction_type.upper():
             sentiment = -0.3
 
         # Adjust by amount
         amount_multiplier = {
-            '$1,001 - $15,000': 0.5,
-            '$15,001 - $50,000': 0.75,
-            '$50,001 - $100,000': 1.0,
-            '$100,001 - $250,000': 1.25,
-            '$250,001 - $500,000': 1.5,
-            'Over $500,000': 2.0
+            "$1,001 - $15,000": 0.5,
+            "$15,001 - $50,000": 0.75,
+            "$50,001 - $100,000": 1.0,
+            "$100,001 - $250,000": 1.25,
+            "$250,001 - $500,000": 1.5,
+            "Over $500,000": 2.0,
         }
 
         multiplier = amount_multiplier.get(amount_range, 1.0)

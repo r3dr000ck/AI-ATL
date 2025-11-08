@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 class PortfolioStatus(BaseModel):
     """Current portfolio status"""
+
     total_equity: float
     available_capital: float
     total_exposure: float
@@ -26,6 +27,7 @@ class PortfolioStatus(BaseModel):
 
 class PerformanceMetrics(BaseModel):
     """Performance metrics"""
+
     total_return: float
     sharpe_ratio: float
     max_drawdown: float
@@ -61,16 +63,22 @@ class MonitorService:
                 total_equity=total_equity,
                 available_capital=capital,
                 total_exposure=total_exposure,
-                exposure_pct=(total_exposure / total_equity * 100) if total_equity > 0 else 0,
+                exposure_pct=(
+                    (total_exposure / total_equity * 100) if total_equity > 0 else 0
+                ),
                 num_positions=len(positions),
-                positions=[{
-                    'ticker': p.ticker,
-                    'quantity': p.quantity,
-                    'entry_price': p.entry_price,
-                    'current_value': p.quantity * p.entry_price,  # Would be current_price in reality
-                    'unrealized_pnl': 0,  # Would calculate from current price
-                    'entry_time': p.entry_time.isoformat()
-                } for p in positions]
+                positions=[
+                    {
+                        "ticker": p.ticker,
+                        "quantity": p.quantity,
+                        "entry_price": p.entry_price,
+                        "current_value": p.quantity
+                        * p.entry_price,  # Would be current_price in reality
+                        "unrealized_pnl": 0,  # Would calculate from current price
+                        "entry_time": p.entry_time.isoformat(),
+                    }
+                    for p in positions
+                ],
             )
 
         @self.app.get("/performance", response_model=PerformanceMetrics)
@@ -84,7 +92,7 @@ class MonitorService:
                     win_rate=0,
                     num_trades=0,
                     avg_win=0,
-                    avg_loss=0
+                    avg_loss=0,
                 )
 
             # Calculate metrics
@@ -94,7 +102,9 @@ class MonitorService:
             wins = [t for t in self.trade_history if t.pnl > 0]
             losses = [t for t in self.trade_history if t.pnl < 0]
 
-            win_rate = (len(wins) / len(self.trade_history) * 100) if self.trade_history else 0
+            win_rate = (
+                (len(wins) / len(self.trade_history) * 100) if self.trade_history else 0
+            )
             avg_win = sum(t.pnl for t in wins) / len(wins) if wins else 0
             avg_loss = sum(t.pnl for t in losses) / len(losses) if losses else 0
 
@@ -111,7 +121,7 @@ class MonitorService:
                 win_rate=win_rate,
                 num_trades=len(self.trade_history),
                 avg_win=avg_win,
-                avg_loss=avg_loss
+                avg_loss=avg_loss,
             )
 
         @self.app.get("/trades")
@@ -120,7 +130,7 @@ class MonitorService:
             recent = self.trade_history[-limit:]
             return {
                 "trades": [t.dict() for t in recent],
-                "total": len(self.trade_history)
+                "total": len(self.trade_history),
             }
 
         @self.app.get("/health")
@@ -130,5 +140,5 @@ class MonitorService:
                 "status": "healthy",
                 "timestamp": datetime.now().isoformat(),
                 "broker_capital": self.broker.get_capital(),
-                "num_positions": len(self.broker.get_positions())
+                "num_positions": len(self.broker.get_positions()),
             }

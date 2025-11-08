@@ -1,0 +1,119 @@
+.icon-btns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  width: 100%;
+}
+
+.icon-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 3rem 2rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 320px;
+}
+
+.icon-btn:hover {
+  transform: translateY(-8px);
+}
+
+.icon-btn__back {
+  position: absolute;
+  inset: 0;
+  border-radius: 1.5rem;
+  opacity: 0.15;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: blur(20px);
+  z-index: 1;
+}
+
+.icon-btn:hover .icon-btn__back {
+  opacity: 0.25;
+}
+
+.icon-btn__front {
+  position: absolute;
+  inset: 0;
+  border-radius: 1.5rem;
+  background: rgba(26, 27, 38, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+}
+
+.icon-btn:hover .icon-btn__front {
+  background: rgba(26, 27, 38, 0.6);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.5);
+}
+
+.icon-btn__icon {
+  position: relative;
+  z-index: 3;
+  font-size: 4rem;
+  line-height: 1;
+  margin-bottom: 1.5rem;
+  display: inline-block;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.icon-btn:hover .icon-btn__icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.icon-btn__label {
+  position: relative;
+  z-index: 3;
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 1rem;
+  text-align: center;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.icon-btn__description {
+  position: relative;
+  z-index: 3;
+  font-size: 1.125rem;
+  color: #a1a1aa;
+  text-align: center;
+  line-height: 1.6;
+  max-width: 90%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .icon-btns {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .icon-btn {
+    min-height: 280px;
+    padding: 2.5rem 1.5rem;
+  }
+
+  .icon-btn__icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .icon-btn__label {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .icon-btn__description {
+    font-size: 1rem;
+  }
+}

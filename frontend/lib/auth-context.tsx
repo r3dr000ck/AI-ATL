@@ -2,12 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-}
+import { authService, User } from '@/services/auth';
 
 interface AuthContextType {
   user: User | null;
@@ -40,55 +35,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await fetch('http://localhost:8000/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
+    const data = await authService.login({ email, password });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Login failed');
-    }
-
-    const data = await response.json();
     setToken(data.token);
     setUser(data.user);
 
-    localStorage.setItem('auth_token', data.token);
     localStorage.setItem('auth_user', JSON.stringify(data.user));
 
     router.push('/');
   };
 
   const signup = async (email: string, password: string, name: string) => {
-    const response = await fetch('http://localhost:8000/auth/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name }),
+    const data = await authService.register({
+      email,
+      password,
+      name,
+      confirm_password: password,
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Signup failed');
-    }
-
-    const data = await response.json();
     setToken(data.token);
     setUser(data.user);
 
-    localStorage.setItem('auth_token', data.token);
     localStorage.setItem('auth_user', JSON.stringify(data.user));
 
     router.push('/');
   };
 
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
-    router.push('/auth');
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setToken(null);
+      setUser(null);
+      localStorage.removeItem('auth_user');
+      router.push('/auth');
+    }
   };
 
   return (

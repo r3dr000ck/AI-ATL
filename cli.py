@@ -20,11 +20,11 @@ def cli():
 
 @cli.command()
 @click.option(
-    '--output',
-    '-o',
+    "--output",
+    "-o",
     type=Path,
-    default=Path('config.yaml'),
-    help='Output path for configuration file'
+    default=Path("config.yaml"),
+    help="Output path for configuration file",
 )
 def init(output: Path):
     """Create a default configuration file"""
@@ -36,11 +36,11 @@ def init(output: Path):
 
 @cli.command()
 @click.option(
-    '--config',
-    '-c',
+    "--config",
+    "-c",
     type=Path,
-    default=Path('config.yaml'),
-    help='Path to configuration file'
+    default=Path("config.yaml"),
+    help="Path to configuration file",
 )
 def run(config: Path):
     """Run the trader in real-time mode"""
@@ -65,11 +65,11 @@ def run(config: Path):
 
 @cli.command()
 @click.option(
-    '--config',
-    '-c',
+    "--config",
+    "-c",
     type=Path,
-    default=Path('config.yaml'),
-    help='Path to configuration file'
+    default=Path("config.yaml"),
+    help="Path to configuration file",
 )
 def backtest(config: Path):
     """Run a backtest simulation"""
@@ -87,11 +87,11 @@ def backtest(config: Path):
 
 @cli.command()
 @click.option(
-    '--config',
-    '-c',
+    "--config",
+    "-c",
     type=Path,
-    default=Path('config.yaml'),
-    help='Path to configuration file'
+    default=Path("config.yaml"),
+    help="Path to configuration file",
 )
 def serve(config: Path):
     """Start API server only (no trading loop)"""
@@ -115,7 +115,7 @@ def serve(config: Path):
     asyncio.run(trader._run_api_server())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()
 
 # python/valuecell_trader/__main__.py
@@ -124,5 +124,5 @@ Make package executable: python -m valuecell_trader
 """
 from .cli import cli
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()

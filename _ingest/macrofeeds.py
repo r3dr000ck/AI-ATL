@@ -26,9 +26,7 @@ class MacroFeedsConnector:
         self.fred_url = "https://api.stlouisfed.org/fred"
 
     def fetch_events(
-            self,
-            since_ts: datetime,
-            indicators: Optional[List[str]] = None
+        self, since_ts: datetime, indicators: Optional[List[str]] = None
     ) -> List[TextEvent]:
         """
         Fetch macro economic events
@@ -46,10 +44,10 @@ class MacroFeedsConnector:
         # Default indicators
         if not indicators:
             indicators = [
-                'DGS10',  # 10-Year Treasury Rate
-                'UNRATE',  # Unemployment Rate
-                'CPIAUCSL',  # CPI (inflation)
-                'FEDFUNDS',  # Fed Funds Rate
+                "DGS10",  # 10-Year Treasury Rate
+                "UNRATE",  # Unemployment Rate
+                "CPIAUCSL",  # CPI (inflation)
+                "FEDFUNDS",  # Fed Funds Rate
             ]
 
         for series_id in indicators:
@@ -59,11 +57,11 @@ class MacroFeedsConnector:
 
                 for obs in observations:
                     try:
-                        date_str = obs.get('date')
-                        value = obs.get('value')
+                        date_str = obs.get("date")
+                        value = obs.get("value")
 
                         # Parse date
-                        obs_dt = datetime.strptime(date_str, '%Y-%m-%d')
+                        obs_dt = datetime.strptime(date_str, "%Y-%m-%d")
                         obs_dt = obs_dt.replace(tzinfo=timezone.utc)
 
                         # Skip if before cutoff
@@ -81,7 +79,7 @@ class MacroFeedsConnector:
 
                         event = TextEvent(
                             event_id=f"sha256:{hashlib.sha256((series_id + date_str).encode()).hexdigest()}",
-                            ticker=['SPY'],  # Macro affects market broadly
+                            ticker=["SPY"],  # Macro affects market broadly
                             source="macrofeeds",
                             url=f"https://fred.stlouisfed.org/series/{series_id}",
                             headline=headline,
@@ -91,7 +89,7 @@ class MacroFeedsConnector:
                             event_type=f"macro_{series_id.lower()}",
                             sentiment_raw=sentiment,
                             confidence=0.85,
-                            novelty=0.80
+                            novelty=0.80,
                         )
 
                         events.append(event)
@@ -106,10 +104,7 @@ class MacroFeedsConnector:
         return events
 
     def _fetch_fred_series(
-            self,
-            series_id: str,
-            since_ts: datetime,
-            limit: int = 10
+        self, series_id: str, since_ts: datetime, limit: int = 10
     ) -> List[dict]:
         """Fetch FRED series observations"""
         if not self.fred_api_key:
@@ -138,20 +133,17 @@ class MacroFeedsConnector:
     def _get_series_name(self, series_id: str) -> str:
         """Get human-readable series name"""
         names = {
-            'DGS10': '10-Year Treasury Rate',
-            'UNRATE': 'Unemployment Rate',
-            'CPIAUCSL': 'Consumer Price Index',
-            'FEDFUNDS': 'Federal Funds Rate',
-            'GDP': 'Gross Domestic Product',
-            'PAYEMS': 'Nonfarm Payrolls'
+            "DGS10": "10-Year Treasury Rate",
+            "UNRATE": "Unemployment Rate",
+            "CPIAUCSL": "Consumer Price Index",
+            "FEDFUNDS": "Federal Funds Rate",
+            "GDP": "Gross Domestic Product",
+            "PAYEMS": "Nonfarm Payrolls",
         }
         return names.get(series_id, series_id)
 
     def _analyze_macro_impact(
-            self,
-            series_id: str,
-            value: str,
-            observation: dict
+        self, series_id: str, value: str, observation: dict
     ) -> float:
         """
         Analyze macro indicator impact on markets
@@ -169,21 +161,21 @@ class MacroFeedsConnector:
         sentiment = 0.0
 
         # Series-specific logic
-        if series_id in ['DGS10', 'FEDFUNDS']:
+        if series_id in ["DGS10", "FEDFUNDS"]:
             # Higher rates = negative for stocks
             if val > 4.5:
                 sentiment = -0.3
             elif val < 3.0:
                 sentiment = 0.2
 
-        elif series_id == 'UNRATE':
+        elif series_id == "UNRATE":
             # Higher unemployment = negative
             if val > 5.0:
                 sentiment = -0.3
             elif val < 4.0:
                 sentiment = 0.2
 
-        elif series_id == 'CPIAUCSL':
+        elif series_id == "CPIAUCSL":
             # Would need YoY comparison for proper analysis
             sentiment = 0.0
 

@@ -6,9 +6,9 @@ from datetime import datetime, timezone, timedelta
 
 API_KEY = "dYELOfhzHjpfSx6oHPlBTPF44OVPvt41"
 TICKER = "META"
-START = "2024-01-01"
-END   = "2025-01-01"
-OUT_CSV = "colin_stock.csv"
+START = "2025-07-29"
+END   = "2025-07-30"
+OUT_CSV = "meta-july.csv"
 INTERVAL_MINUTES = 5
 
 # GICS-aligned sector info (simplified)

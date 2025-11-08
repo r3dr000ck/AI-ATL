@@ -21,9 +21,7 @@ class AlternativeDataConnector:
         self.session = requests.Session()
 
     def fetch_events(
-            self,
-            since_ts: datetime,
-            tickers: Optional[List[str]] = None
+        self, since_ts: datetime, tickers: Optional[List[str]] = None
     ) -> List[TextEvent]:
         """
         Fetch alternative data signals
@@ -48,10 +46,7 @@ class AlternativeDataConnector:
         return events
 
     def _analyze_app_download_trend(
-            self,
-            ticker: str,
-            downloads: int,
-            change_pct: float
+        self, ticker: str, downloads: int, change_pct: float
     ) -> float:
         """Analyze app download trends"""
         sentiment = 0.0

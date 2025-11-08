@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ValueCell AI Trader | Intelligent Trading Dashboard",
+  title: "Futures AI Trader | Intelligent Trading Dashboard",
   description: "Advanced LLM-powered algorithmic trading platform with real-time market analysis and automated execution",
-  keywords: ["AI trading", "algorithmic trading", "LLM", "automated trading", "ValueCell"],
+  keywords: ["AI trading", "algorithmic trading", "LLM", "automated trading", "Futures AI"],
 };
 
 export default function RootLayout({

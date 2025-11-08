@@ -22,6 +22,7 @@ print()
 # SIMPLIFIED MODELS
 # ============================================================================
 
+
 class SimplePUp:
     """Simple conviction probability model"""
 
@@ -71,18 +72,10 @@ class SimpleEnsemble:
 
     def score(self, features: Dict[str, Any]) -> Dict[str, Any]:
         p_up = self.p_up.predict(
-            features['sentiment'],
-            features['rsi'],
-            features['volume_ratio']
+            features["sentiment"], features["rsi"], features["volume_ratio"]
         )
-        d_ext = self.d_ext.compute(
-            features['rsi'],
-            features['z_score']
-        )
-        p_drop = self.p_drop.predict(
-            features['sentiment'],
-            features['spread']
-        )
+        d_ext = self.d_ext.compute(features["rsi"], features["z_score"])
+        p_drop = self.p_drop.predict(features["sentiment"], features["spread"])
 
         s_final = p_up * d_ext * (1 - p_drop)
 
@@ -94,17 +87,18 @@ class SimpleEnsemble:
             action = "HOLD"
 
         return {
-            's_final': s_final,
-            'p_up': p_up,
-            'd_ext': d_ext,
-            'p_drop': p_drop,
-            'action': action
+            "s_final": s_final,
+            "p_up": p_up,
+            "d_ext": d_ext,
+            "p_drop": p_drop,
+            "action": action,
         }
 
 
 # ============================================================================
 # SIMPLE BROKER
 # ============================================================================
+
 
 class SimpleBroker:
     """Simple paper trading broker"""
@@ -120,9 +114,9 @@ class SimpleBroker:
         if cost <= self.capital:
             self.capital -= cost
             self.positions[ticker] = {
-                'quantity': quantity,
-                'entry_price': price,
-                'entry_time': datetime.now()
+                "quantity": quantity,
+                "entry_price": price,
+                "entry_time": datetime.now(),
             }
             print(f"  ✓ BOUGHT {quantity:.2f} shares of {ticker} @ ${price:.2f}")
         else:
@@ -131,19 +125,24 @@ class SimpleBroker:
     def sell(self, ticker: str, price: float):
         if ticker in self.positions:
             pos = self.positions[ticker]
-            proceeds = pos['quantity'] * price * 0.999  # 0.1% slippage
-            pnl = proceeds - (pos['quantity'] * pos['entry_price'])
+            proceeds = pos["quantity"] * price * 0.999  # 0.1% slippage
+            pnl = proceeds - (pos["quantity"] * pos["entry_price"])
             self.capital += proceeds
 
-            self.trades.append({
-                'ticker': ticker,
-                'pnl': pnl,
-                'pnl_pct': (pnl / (pos['quantity'] * pos['entry_price'])) * 100,
-                'hold_time': (datetime.now() - pos['entry_time']).total_seconds() / 3600
-            })
+            self.trades.append(
+                {
+                    "ticker": ticker,
+                    "pnl": pnl,
+                    "pnl_pct": (pnl / (pos["quantity"] * pos["entry_price"])) * 100,
+                    "hold_time": (datetime.now() - pos["entry_time"]).total_seconds()
+                    / 3600,
+                }
+            )
 
             print(f"  ✓ SOLD {pos['quantity']:.2f} shares of {ticker} @ ${price:.2f}")
-            print(f"    P&L: ${pnl:+.2f} ({pnl / (pos['quantity'] * pos['entry_price']) * 100:+.2f}%)")
+            print(
+                f"    P&L: ${pnl:+.2f} ({pnl / (pos['quantity'] * pos['entry_price']) * 100:+.2f}%)"
+            )
 
             del self.positions[ticker]
         else:
@@ -152,28 +151,29 @@ class SimpleBroker:
     def get_total_equity(self, prices: Dict[str, float]) -> float:
         equity = self.capital
         for ticker, pos in self.positions.items():
-            equity += pos['quantity'] * prices.get(ticker, pos['entry_price'])
+            equity += pos["quantity"] * prices.get(ticker, pos["entry_price"])
         return equity
 
     def get_stats(self):
         if not self.trades:
             return None
 
-        wins = [t for t in self.trades if t['pnl'] > 0]
-        losses = [t for t in self.trades if t['pnl'] < 0]
+        wins = [t for t in self.trades if t["pnl"] > 0]
+        losses = [t for t in self.trades if t["pnl"] < 0]
 
         return {
-            'total_trades': len(self.trades),
-            'win_rate': len(wins) / len(self.trades) * 100,
-            'avg_win': sum(t['pnl'] for t in wins) / len(wins) if wins else 0,
-            'avg_loss': sum(t['pnl'] for t in losses) / len(losses) if losses else 0,
-            'total_pnl': sum(t['pnl'] for t in self.trades)
+            "total_trades": len(self.trades),
+            "win_rate": len(wins) / len(self.trades) * 100,
+            "avg_win": sum(t["pnl"] for t in wins) / len(wins) if wins else 0,
+            "avg_loss": sum(t["pnl"] for t in losses) / len(losses) if losses else 0,
+            "total_pnl": sum(t["pnl"] for t in self.trades),
         }
 
 
 # ============================================================================
 # DEMO SCENARIO
 # ============================================================================
+
 
 def run_demo():
     """Run a simplified trading demo"""
@@ -185,7 +185,7 @@ def run_demo():
     ensemble = SimpleEnsemble()
     broker = SimpleBroker(capital=1000)
 
-    tickers = ['AAPL', 'MSFT', 'NVDA', 'META', 'GOOGL']
+    tickers = ["AAPL", "MSFT", "NVDA", "META", "GOOGL"]
     prices = {t: 100 + random.uniform(-20, 20) for t in tickers}
 
     print(f"Starting Capital: ${broker.capital:.2f}")
@@ -200,43 +200,45 @@ def run_demo():
         # Update prices (random walk)
         for ticker in tickers:
             change = random.gauss(0, 0.03)
-            prices[ticker] *= (1 + change)
+            prices[ticker] *= 1 + change
 
         # Evaluate each ticker
         for ticker in tickers:
             # Generate random features (in real system, these come from data)
             features = {
-                'sentiment': random.gauss(0, 0.3),
-                'rsi': random.uniform(30, 70),
-                'volume_ratio': random.uniform(0.5, 3),
-                'z_score': random.gauss(0, 1),
-                'spread': random.uniform(3, 10)
+                "sentiment": random.gauss(0, 0.3),
+                "rsi": random.uniform(30, 70),
+                "volume_ratio": random.uniform(0.5, 3),
+                "z_score": random.gauss(0, 1),
+                "spread": random.uniform(3, 10),
             }
 
             # Score
             result = ensemble.score(features)
 
             print(f"\n{ticker} @ ${prices[ticker]:.2f}")
-            print(f"  Score: {result['s_final']:.3f} (P_up={result['p_up']:.2f}, "
-                  f"D_ext={result['d_ext']:.2f}, P_drop={result['p_drop']:.2f})")
+            print(
+                f"  Score: {result['s_final']:.3f} (P_up={result['p_up']:.2f}, "
+                f"D_ext={result['d_ext']:.2f}, P_drop={result['p_drop']:.2f})"
+            )
             print(f"  Action: {result['action']}")
 
             # Execute action
             has_position = ticker in broker.positions
 
-            if result['action'] == 'BUY' and not has_position:
+            if result["action"] == "BUY" and not has_position:
                 # Size position (5% of capital)
                 notional = broker.capital * 0.05
                 quantity = notional / prices[ticker]
                 broker.buy(ticker, quantity, prices[ticker])
 
-            elif result['action'] == 'SELL' and has_position:
+            elif result["action"] == "SELL" and has_position:
                 broker.sell(ticker, prices[ticker])
 
             elif has_position:
                 # Check stop loss / take profit
                 pos = broker.positions[ticker]
-                pnl_pct = (prices[ticker] / pos['entry_price'] - 1) * 100
+                pnl_pct = (prices[ticker] / pos["entry_price"] - 1) * 100
 
                 if pnl_pct <= -2:  # 2% stop loss
                     print(f"  🛑 Stop loss triggered ({pnl_pct:.1f}%)")
@@ -248,13 +250,16 @@ def run_demo():
         # Show portfolio status
         equity = broker.get_total_equity(prices)
         print(f"\n{'─' * 70}")
-        print(f"Portfolio: ${equity:.2f} (Cash: ${broker.capital:.2f}, "
-              f"Positions: {len(broker.positions)})")
+        print(
+            f"Portfolio: ${equity:.2f} (Cash: ${broker.capital:.2f}, "
+            f"Positions: {len(broker.positions)})"
+        )
         print(f"Return: {(equity / broker.initial_capital - 1) * 100:+.2f}%")
         print()
 
         # Small delay for readability
         import time
+
         time.sleep(0.5)
 
     # Final results
@@ -291,5 +296,5 @@ def run_demo():
     print()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_demo()

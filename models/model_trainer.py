@@ -10,6 +10,7 @@ from .ensemble import EnsembleScorer
 from .model_trainer import ModelTrainer
 
 __all__ = [
+<<<<<<< HEAD
     'PUpModel', 
     'PDropModel',
     'DExtModel',
@@ -17,3 +18,12 @@ __all__ = [
     'EnsembleScorer',
     'ModelTrainer'
 ]
+=======
+    "PUpModel",
+    "PDropModel",
+    "DExtModel",
+    "RVolModel",
+    "EnsembleScorer",
+    "ModelTrainer",
+]
+>>>>>>> 23f2be57215fb59c814f1ee515aef881af82971b

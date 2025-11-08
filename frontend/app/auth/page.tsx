@@ -3,6 +3,15 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import GlassIcons from '@/components/GlassIcons';
+import DecryptedText from '@/components/DecryptedText';
+
+// Dynamically import Dither to avoid SSR issues with Three.js
+const Dither = dynamic(() => import('@/components/Dither'), {
+  ssr: false,
+  loading: () => null
+});
 
 export default function AuthPage() {
   const { login, signup } = useAuth();
@@ -62,26 +71,18 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden relative">
-      {/* Geometric Grid Background */}
-      <div className="fixed inset-0 -z-10 geometric-grid"></div>
-
-      {/* Triangle geometric elements */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        {/* Top left */}
-        <div className="triangle-pattern triangle-down triangle-animate absolute top-20 left-10" style={{ borderWidth: '0 80px 140px 80px' }}></div>
-        <div className="triangle-pattern triangle-right triangle-animate-slow absolute top-40 left-40" style={{ borderWidth: '60px 0 60px 104px' }}></div>
-
-        {/* Top right */}
-        <div className="triangle-pattern triangle-up triangle-animate-slow absolute top-32 right-20" style={{ borderWidth: '0 70px 121px 70px' }}></div>
-
-        {/* Middle */}
-        <div className="triangle-pattern triangle-left triangle-animate absolute top-1/2 left-1/4" style={{ borderWidth: '50px 87px 50px 0', opacity: '0.5' }}></div>
-        <div className="triangle-pattern triangle-down triangle-animate-slow absolute top-1/3 right-1/4" style={{ borderWidth: '100px 58px 0 58px' }}></div>
-
-        {/* Bottom */}
-        <div className="triangle-pattern triangle-up triangle-animate absolute bottom-40 left-1/3" style={{ borderWidth: '0 90px 156px 90px' }}></div>
-        <div className="triangle-pattern triangle-right triangle-animate-slow absolute bottom-20 right-40" style={{ borderWidth: '70px 0 70px 121px' }}></div>
-      </div>
+      {/* Dithered Waves Background */}
+      <Dither
+        waveSpeed={0.02}
+        waveFrequency={2}
+        waveAmplitude={0.4}
+        waveColor={[0.15, 0.2, 0.4]}
+        colorNum={5}
+        pixelSize={2.5}
+        disableAnimation={false}
+        enableMouseInteraction={true}
+        mouseRadius={1.2}
+      />
 
       {/* Navigation Bar */}
       <nav
@@ -91,7 +92,7 @@ export default function AuthPage() {
       >
         <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold text-white tracking-tight">
-            ValueCell AI
+            Futures AI
           </Link>
           <div className="flex items-center gap-4">
             <button
@@ -111,24 +112,40 @@ export default function AuthPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="min-h-screen flex items-center justify-center px-6 pt-20 relative">
-        <div className="max-w-5xl mx-auto text-center">
-          <h1 className="text-7xl md:text-8xl font-bold text-white mb-8 leading-tight tracking-tight opacity-0 animate-[fade-in-scale_0.8s_ease-out_forwards]">
-            The Future of<br/>Trading is Here
-          </h1>
-          <p className="text-2xl md:text-3xl text-gray-400 mb-12 font-light opacity-0 animate-[fade-in-scale_0.8s_ease-out_0.2s_forwards]">
-            Powered by cutting-edge <span className="text-white font-medium">Large Language Models</span>
-          </p>
-          <div className="flex items-center justify-center gap-3 mb-8 opacity-0 animate-[fade-in-scale_0.8s_ease-out_0.4s_forwards]">
-            <div className="w-24 h-px bg-gradient-to-r from-transparent via-white to-transparent"></div>
-            <div className="w-2 h-2 bg-white rounded-full"></div>
-            <div className="w-24 h-px bg-gradient-to-r from-transparent via-white to-transparent"></div>
+      <section className="min-h-screen flex items-center justify-center px-6 pt-20 relative z-10">
+        <div className="max-w-7xl mx-auto w-full text-center">
+          {/* Decrypted Title */}
+          <div className="mb-12">
+            <h1 className="text-7xl md:text-9xl font-bold text-white tracking-tight mb-8">
+              <DecryptedText
+                text="FUTURES AI"
+                speed={150}
+                maxIterations={40}
+                animateOn="view"
+                revealDirection="center"
+                className="text-7xl md:text-9xl"
+              />
+            </h1>
+          </div>
+
+          <div className="text-center opacity-0 animate-[fade-in-scale_0.8s_ease-out_0.2s_forwards]">
+            <p className="text-2xl md:text-3xl text-gray-400 mb-6 font-light">
+              The Future of Trading
+            </p>
+            <p className="text-xl md:text-2xl text-gray-500 mb-12 font-light">
+              Powered by cutting-edge <span className="text-white font-medium">Large Language Models</span>
+            </p>
+            <div className="flex items-center justify-center gap-3">
+              <div className="w-24 h-px bg-gradient-to-r from-transparent via-white to-transparent"></div>
+              <div className="w-2 h-2 bg-white rounded-full"></div>
+              <div className="w-24 h-px bg-gradient-to-r from-transparent via-white to-transparent"></div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Vision Section */}
-      <section className="min-h-screen flex items-center justify-center px-6 py-20 relative">
+      <section className="min-h-screen flex items-center justify-center px-6 py-20 relative z-10">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-5xl md:text-6xl font-bold text-white mb-16 text-center tracking-tight">
             Why LLM Trading?
@@ -144,55 +161,45 @@ export default function AuthPage() {
               simple technical indicators.
             </p>
             <p className="text-white font-normal text-2xl md:text-3xl mt-12">
-              ValueCell AI Trader harnesses this power to give you an edge in the market.
+              Futures AI harnesses this power to give you an edge in the market.
             </p>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="min-h-screen flex items-center justify-center px-6 py-20 relative">
+      <section className="min-h-screen flex items-center justify-center px-6 py-20 relative z-10">
         <div className="max-w-7xl mx-auto w-full">
           <h2 className="text-5xl md:text-6xl font-bold text-white mb-20 text-center tracking-tight">
             Built for the Future
           </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="glass-card p-10 rounded-3xl hover-glow group relative overflow-hidden">
-              {/* Small triangle accent */}
-              <div className="triangle-pattern triangle-up absolute top-4 right-4 opacity-20" style={{ borderWidth: '0 15px 26px 15px', borderColor: 'transparent transparent white transparent' }}></div>
-
-              <div className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300">🧠</div>
-              <h3 className="text-3xl font-bold text-white mb-4 tracking-tight">AI-Powered Decisions</h3>
-              <p className="text-gray-400 text-lg leading-relaxed">
-                Our LLM analyzes market sentiment, news, and technical data to make informed trading decisions.
-              </p>
-            </div>
-            <div className="glass-card p-10 rounded-3xl hover-glow group relative overflow-hidden">
-              {/* Small triangle accent */}
-              <div className="triangle-pattern triangle-down absolute top-4 right-4 opacity-20" style={{ borderWidth: '26px 15px 0 15px', borderColor: 'white transparent transparent transparent' }}></div>
-
-              <div className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300">⚡</div>
-              <h3 className="text-3xl font-bold text-white mb-4 tracking-tight">Real-Time Execution</h3>
-              <p className="text-gray-400 text-lg leading-relaxed">
-                Execute trades instantly with our optimized infrastructure and automated position management.
-              </p>
-            </div>
-            <div className="glass-card p-10 rounded-3xl hover-glow group relative overflow-hidden">
-              {/* Small triangle accent */}
-              <div className="triangle-pattern triangle-right absolute top-4 right-4 opacity-20" style={{ borderWidth: '15px 0 15px 26px', borderColor: 'transparent transparent transparent white' }}></div>
-
-              <div className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300">📊</div>
-              <h3 className="text-3xl font-bold text-white mb-4 tracking-tight">Advanced Analytics</h3>
-              <p className="text-gray-400 text-lg leading-relaxed">
-                Track performance, analyze positions, and optimize your strategy with detailed insights.
-              </p>
-            </div>
-          </div>
+          <GlassIcons
+            items={[
+              {
+                icon: '',
+                label: 'AI-Powered Decisions',
+                description: 'Our LLM analyzes market sentiment, news, and technical data to make informed trading decisions.',
+                color: 'blue'
+              },
+              {
+                icon: '',
+                label: 'Real-Time Execution',
+                description: 'Execute trades instantly with our optimized infrastructure and automated position management.',
+                color: 'purple'
+              },
+              {
+                icon: '',
+                label: 'Advanced Analytics',
+                description: 'Track performance, analyze positions, and optimize your strategy with detailed insights.',
+                color: 'indigo'
+              }
+            ]}
+          />
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="min-h-screen flex items-center justify-center px-6 py-20 relative">
+      <section className="min-h-screen flex items-center justify-center px-6 py-20 relative z-10">
         <div className="max-w-5xl mx-auto text-center">
           <h2 className="text-6xl md:text-7xl font-bold text-white mb-8 tracking-tight leading-tight">
             Join The<br/>Movement Now

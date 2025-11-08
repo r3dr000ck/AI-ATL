@@ -14,11 +14,7 @@ class RiskManager:
     def __init__(self, risk_config: RiskConfig):
         self.config = risk_config
 
-    def calculate_stops(
-            self,
-            entry_price: float,
-            atr: Optional[float] = None
-    ) -> tuple:
+    def calculate_stops(self, entry_price: float, atr: Optional[float] = None) -> tuple:
         """
         Calculate stop loss and take profit levels
 
@@ -43,11 +39,11 @@ class RiskManager:
         return stop_price, tp_price
 
     def check_exits(
-            self,
-            position: Position,
-            current_bar: PriceBar,
-            current_time: datetime,
-            p_drop: float
+        self,
+        position: Position,
+        current_bar: PriceBar,
+        current_time: datetime,
+        p_drop: float,
     ) -> Optional[str]:
         """
         Check if position should be exited
@@ -80,4 +76,3 @@ class RiskManager:
             return "kneejerk"
 
         return None
-

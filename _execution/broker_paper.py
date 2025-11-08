@@ -19,11 +19,11 @@ class PaperBroker:
         self.execution_history: List[ExecutionReport] = []
 
     def submit_order(
-            self,
-            order: Order,
-            current_bar: PriceBar,
-            slippage_bps: float = 10,
-            fee_bps: float = 2
+        self,
+        order: Order,
+        current_bar: PriceBar,
+        slippage_bps: float = 10,
+        fee_bps: float = 2,
     ) -> ExecutionReport:
         """
         Submit order (simulate execution)
@@ -40,7 +40,7 @@ class PaperBroker:
         self.orders[order.order_id] = order
 
         # Simulate fill price with slippage
-        if order.side == 'buy':
+        if order.side == "buy":
             fill_price = current_bar.close * (1 + slippage_bps / 10000)
         else:  # sell
             fill_price = current_bar.close * (1 - slippage_bps / 10000)
@@ -50,27 +50,27 @@ class PaperBroker:
         commission = notional * (fee_bps / 10000)
 
         # Update order status
-        order.status = 'filled'
+        order.status = "filled"
         order.filled_price = fill_price
         order.filled_time = current_bar.ts
 
         # Create execution report
         report = ExecutionReport(
             order_id=order.order_id,
-            status='filled',
+            status="filled",
             filled_quantity=order.quantity,
             filled_price=fill_price,
             commission=commission,
-            timestamp=current_bar.ts
+            timestamp=current_bar.ts,
         )
 
         self.execution_history.append(report)
 
         # Update capital
-        if order.side == 'buy':
-            self.capital -= (notional + commission)
+        if order.side == "buy":
+            self.capital -= notional + commission
         else:  # sell
-            self.capital += (notional - commission)
+            self.capital += notional - commission
 
         return report
 
@@ -92,10 +92,7 @@ class PaperBroker:
 
     def get_total_exposure(self) -> float:
         """Get total exposure across all positions"""
-        return sum(
-            pos.quantity * pos.entry_price
-            for pos in self.positions.values()
-        )
+        return sum(pos.quantity * pos.entry_price for pos in self.positions.values())
 
 
 # python/valuecell_trader/execution/orders.py
@@ -113,10 +110,7 @@ class OrderManager:
     """Manage order creation"""
 
     def create_entry_order(
-            self,
-            allocation: Allocation,
-            current_bar: PriceBar,
-            max_spread_bps: float = 15
+        self, allocation: Allocation, current_bar: PriceBar, max_spread_bps: float = 15
     ) -> Optional[Order]:
         """
         Create an entry order from allocation
@@ -145,20 +139,17 @@ class OrderManager:
         order = Order(
             order_id=str(uuid.uuid4()),
             ticker=allocation.ticker,
-            side='buy',
+            side="buy",
             quantity=quantity,
-            order_type='limit',
+            order_type="limit",
             limit_price=limit_price,
-            status='pending'
+            status="pending",
         )
 
         return order
 
     def create_exit_order(
-            self,
-            ticker: str,
-            quantity: float,
-            current_bar: PriceBar
+        self, ticker: str, quantity: float, current_bar: PriceBar
     ) -> Order:
         """
         Create an exit order
@@ -175,10 +166,10 @@ class OrderManager:
         order = Order(
             order_id=str(uuid.uuid4()),
             ticker=ticker,
-            side='sell',
+            side="sell",
             quantity=quantity,
-            order_type='market',
-            status='pending'
+            order_type="market",
+            status="pending",
         )
 
         return order

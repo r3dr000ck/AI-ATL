@@ -9,7 +9,12 @@ import numpy as np
 import pandas as pd
 
 from ..storage.schemas import (
-    PriceBar, TextEvent, Position, Trade, BacktestReport, Features
+    PriceBar,
+    TextEvent,
+    Position,
+    Trade,
+    BacktestReport,
+    Features,
 )
 from ..config.schema import TraderConfig
 from ..features.text_features import TextFeatureBuilder
@@ -40,7 +45,7 @@ class BacktestEngine:
             alpha=config.scoring.alpha_ext,
             z_threshold=config.scoring.z_threshold,
             rsi_overbought=config.scoring.rsi_overbought,
-            volume_spike_mult=config.scoring.volume_spike_mult
+            volume_spike_mult=config.scoring.volume_spike_mult,
         )
         self.p_drop_model = PDropModel()
 
@@ -53,12 +58,12 @@ class BacktestEngine:
         self.prev_s_final: Dict[str, float] = {}
 
     def run_backtest(
-            self,
-            start_ts: datetime,
-            end_ts: datetime,
-            bars_data: Dict[str, List[PriceBar]],
-            events_data: List[TextEvent],
-            initial_capital: float = 1000.0
+        self,
+        start_ts: datetime,
+        end_ts: datetime,
+        bars_data: Dict[str, List[PriceBar]],
+        events_data: List[TextEvent],
+        initial_capital: float = 1000.0,
     ) -> BacktestReport:
         """
         Run time-capsule backtest
@@ -95,7 +100,9 @@ class BacktestEngine:
         # Main simulation loop
         for i, current_ts in enumerate(timestamps):
             if i % 100 == 0:
-                print(f"Progress: {i}/{len(timestamps)} ({i / len(timestamps) * 100:.1f}%)")
+                print(
+                    f"Progress: {i}/{len(timestamps)} ({i / len(timestamps) * 100:.1f}%)"
+                )
 
             # Get visible events (with latency)
             visible_events = self._get_visible_events(events_data, current_ts)
@@ -106,10 +113,7 @@ class BacktestEngine:
                     continue
 
                 # Get historical bars up to current time
-                hist_bars = [
-                    bar for bar in bars_data[ticker]
-                    if bar.ts <= current_ts
-                ]
+                hist_bars = [bar for bar in bars_data[ticker] if bar.ts <= current_ts]
 
                 if len(hist_bars) < 30:  # Need enough history
                     continue
@@ -119,8 +123,7 @@ class BacktestEngine:
                 # Check if we have a position
                 positions = broker.get_positions()
                 existing_position = next(
-                    (p for p in positions if p.ticker == ticker),
-                    None
+                    (p for p in positions if p.ticker == ticker), None
                 )
 
                 if existing_position:
@@ -132,7 +135,7 @@ class BacktestEngine:
                         hist_bars,
                         visible_events,
                         broker,
-                        completed_trades
+                        completed_trades,
                     )
                 else:
                     # Evaluate new entry
@@ -142,41 +145,34 @@ class BacktestEngine:
                         current_ts,
                         hist_bars,
                         visible_events,
-                        broker
+                        broker,
                     )
 
             # Record equity
             total_equity = broker.get_capital()
             for position in broker.get_positions():
                 # Mark to market
-                hist_bars = [b for b in bars_data[position.ticker] if b.ts <= current_ts]
+                hist_bars = [
+                    b for b in bars_data[position.ticker] if b.ts <= current_ts
+                ]
                 if hist_bars:
                     current_price = hist_bars[-1].close
                     total_equity += position.quantity * current_price
 
-            equity_curve.append({
-                'timestamp': current_ts,
-                'equity': total_equity
-            })
+            equity_curve.append({"timestamp": current_ts, "equity": total_equity})
 
         print(f"Backtest complete. Final capital: ${broker.get_capital():.2f}")
         print(f"Number of trades: {len(completed_trades)}")
 
         # Calculate metrics
         report = self._calculate_metrics(
-            initial_capital,
-            equity_curve,
-            completed_trades,
-            start_ts,
-            end_ts
+            initial_capital, equity_curve, completed_trades, start_ts, end_ts
         )
 
         return report
 
     def _get_visible_events(
-            self,
-            all_events: List[TextEvent],
-            current_ts: datetime
+        self, all_events: List[TextEvent], current_ts: datetime
     ) -> List[TextEvent]:
         """
         Get events visible at current time (with latency)
@@ -196,13 +192,13 @@ class BacktestEngine:
         return visible
 
     def _evaluate_entry(
-            self,
-            ticker: str,
-            current_bar: PriceBar,
-            current_ts: datetime,
-            hist_bars: List[PriceBar],
-            visible_events: List[TextEvent],
-            broker: PaperBroker
+        self,
+        ticker: str,
+        current_bar: PriceBar,
+        current_ts: datetime,
+        hist_bars: List[PriceBar],
+        visible_events: List[TextEvent],
+        broker: PaperBroker,
     ):
         """Evaluate potential new entry"""
         # Build features
@@ -234,15 +230,14 @@ class BacktestEngine:
 
         # Size position
         current_exposures = {
-            p.ticker: p.quantity * p.entry_price
-            for p in broker.get_positions()
+            p.ticker: p.quantity * p.entry_price for p in broker.get_positions()
         }
 
         allocation = self.sizer.size_position(
             ticker,
             s_final,
             broker.get_capital() + broker.get_total_exposure(),
-            current_exposures
+            current_exposures,
         )
 
         if not allocation or allocation.target_notional <= 0:
@@ -258,12 +253,12 @@ class BacktestEngine:
             order,
             current_bar,
             self.config.simulation.slippage_bps,
-            self.config.simulation.fee_bps
+            self.config.simulation.fee_bps,
         )
 
-        if report.status == 'filled':
+        if report.status == "filled":
             # Calculate stops
-            atr = market_feat.get('atr')
+            atr = market_feat.get("atr")
             stop_price, tp_price = self.risk_manager.calculate_stops(
                 report.filled_price, atr
             )
@@ -277,20 +272,20 @@ class BacktestEngine:
                 stop_price=stop_price,
                 tp_price=tp_price,
                 timeout_time=current_ts + timedelta(days=self.config.risk.timeout_days),
-                s_final_entry=s_final
+                s_final_entry=s_final,
             )
 
             broker.add_position(position)
 
     def _manage_position(
-            self,
-            position: Position,
-            current_bar: PriceBar,
-            current_ts: datetime,
-            hist_bars: List[PriceBar],
-            visible_events: List[TextEvent],
-            broker: PaperBroker,
-            completed_trades: List[Trade]
+        self,
+        position: Position,
+        current_bar: PriceBar,
+        current_ts: datetime,
+        hist_bars: List[PriceBar],
+        visible_events: List[TextEvent],
+        broker: PaperBroker,
+        completed_trades: List[Trade],
     ):
         """Manage existing position"""
         # Build features for exit decision
@@ -306,18 +301,13 @@ class BacktestEngine:
 
         # Check exits
         exit_reason = self.risk_manager.check_exits(
-            position,
-            current_bar,
-            current_ts,
-            p_drop
+            position, current_bar, current_ts, p_drop
         )
 
         if exit_reason:
             # Create exit order
             order = self.order_manager.create_exit_order(
-                position.ticker,
-                position.quantity,
-                current_bar
+                position.ticker, position.quantity, current_bar
             )
 
             # Execute exit
@@ -325,10 +315,10 @@ class BacktestEngine:
                 order,
                 current_bar,
                 self.config.simulation.slippage_bps,
-                self.config.simulation.fee_bps
+                self.config.simulation.fee_bps,
             )
 
-            if report.status == 'filled':
+            if report.status == "filled":
                 # Calculate P&L
                 pnl = (report.filled_price - position.entry_price) * position.quantity
                 pnl_pct = (report.filled_price / position.entry_price - 1) * 100
@@ -345,26 +335,26 @@ class BacktestEngine:
                     pnl=pnl,
                     pnl_pct=pnl_pct,
                     exit_reason=exit_reason,
-                    s_final_entry=position.s_final_entry
+                    s_final_entry=position.s_final_entry,
                 )
 
                 completed_trades.append(trade)
                 broker.remove_position(position.ticker)
 
     def _calculate_metrics(
-            self,
-            initial_capital: float,
-            equity_curve: List[Dict],
-            trades: List[Trade],
-            start_ts: datetime,
-            end_ts: datetime
+        self,
+        initial_capital: float,
+        equity_curve: List[Dict],
+        trades: List[Trade],
+        start_ts: datetime,
+        end_ts: datetime,
     ) -> BacktestReport:
         """Calculate backtest metrics"""
         if not equity_curve:
             return self._empty_report(initial_capital, start_ts, end_ts)
 
         df = pd.DataFrame(equity_curve)
-        final_capital = df['equity'].iloc[-1]
+        final_capital = df["equity"].iloc[-1]
 
         # Calculate returns
         total_return = (final_capital / initial_capital - 1) * 100
@@ -372,23 +362,31 @@ class BacktestEngine:
         # CAGR
         days = (end_ts - start_ts).days
         years = days / 365.25
-        cagr = ((final_capital / initial_capital) ** (1 / years) - 1) * 100 if years > 0 else 0
+        cagr = (
+            ((final_capital / initial_capital) ** (1 / years) - 1) * 100
+            if years > 0
+            else 0
+        )
 
         # Sharpe ratio
-        df['returns'] = df['equity'].pct_change()
-        sharpe = (df['returns'].mean() / df['returns'].std() * np.sqrt(252)) if df['returns'].std() > 0 else 0
+        df["returns"] = df["equity"].pct_change()
+        sharpe = (
+            (df["returns"].mean() / df["returns"].std() * np.sqrt(252))
+            if df["returns"].std() > 0
+            else 0
+        )
 
         # Sortino ratio
-        downside_returns = df['returns'][df['returns'] < 0]
+        downside_returns = df["returns"][df["returns"] < 0]
         sortino = (
-            df['returns'].mean() / downside_returns.std() * np.sqrt(252)
+            df["returns"].mean() / downside_returns.std() * np.sqrt(252)
             if len(downside_returns) > 0 and downside_returns.std() > 0
             else 0
         )
 
         # Max drawdown
-        cummax = df['equity'].cummax()
-        drawdown = (df['equity'] - cummax) / cummax
+        cummax = df["equity"].cummax()
+        drawdown = (df["equity"] - cummax) / cummax
         max_dd = drawdown.min() * 100
 
         # Trade statistics
@@ -428,10 +426,12 @@ class BacktestEngine:
             turnover=turnover,
             trades=trades,
             brier_score=brier_score,
-            reliability_bins=reliability_bins
+            reliability_bins=reliability_bins,
         )
 
-    def _empty_report(self, initial_capital: float, start_ts: datetime, end_ts: datetime) -> BacktestReport:
+    def _empty_report(
+        self, initial_capital: float, start_ts: datetime, end_ts: datetime
+    ) -> BacktestReport:
         """Return empty report when no data"""
         return BacktestReport(
             start_time=start_ts,
@@ -450,5 +450,5 @@ class BacktestEngine:
             turnover=0.0,
             trades=[],
             brier_score=0.0,
-            reliability_bins={}
+            reliability_bins={},
         )

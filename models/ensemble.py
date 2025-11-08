@@ -25,12 +25,12 @@ class EnsembleScorer:
         self.prev_scores: Dict[str, float] = {}
 
     def calculate_final_score(
-            self,
-            p_up: float,
-            d_ext: float,
-            p_drop: float,
-            r_vol: Optional[float] = None,
-            ticker: Optional[str] = None
+        self,
+        p_up: float,
+        d_ext: float,
+        p_drop: float,
+        r_vol: Optional[float] = None,
+        ticker: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Calculate final investment score and recommendation
@@ -68,9 +68,7 @@ class EnsembleScorer:
 
         # Calculate expected move magnitude
         # Combination of conviction and volatility
-        expected_move = self._calculate_expected_move(
-            p_up, p_drop, r_vol, d_ext
-        )
+        expected_move = self._calculate_expected_move(p_up, p_drop, r_vol, d_ext)
 
         # Determine action
         action = self._determine_action(s_final, p_drop, r_vol)
@@ -79,25 +77,21 @@ class EnsembleScorer:
         confidence = self._calculate_confidence(p_up, p_drop, d_ext, r_vol)
 
         return {
-            's_final': float(s_final),
-            's_raw': float(s_raw),
-            'expected_move': expected_move,
-            'action': action,
-            'confidence': confidence,
-            'components': {
-                'p_up': p_up,
-                'd_ext': d_ext,
-                'p_drop': p_drop,
-                'r_vol': r_vol
-            }
+            "s_final": float(s_final),
+            "s_raw": float(s_raw),
+            "expected_move": expected_move,
+            "action": action,
+            "confidence": confidence,
+            "components": {
+                "p_up": p_up,
+                "d_ext": d_ext,
+                "p_drop": p_drop,
+                "r_vol": r_vol,
+            },
         }
 
     def _calculate_expected_move(
-            self,
-            p_up: float,
-            p_drop: float,
-            r_vol: Optional[float],
-            d_ext: float
+        self, p_up: float, p_drop: float, r_vol: Optional[float], d_ext: float
     ) -> Optional[float]:
         """
         Calculate expected percentage move
@@ -124,10 +118,7 @@ class EnsembleScorer:
         return float(expected_move)
 
     def _determine_action(
-            self,
-            s_final: float,
-            p_drop: float,
-            r_vol: Optional[float]
+        self, s_final: float, p_drop: float, r_vol: Optional[float]
     ) -> str:
         """
         Determine recommended action
@@ -136,7 +127,7 @@ class EnsembleScorer:
         """
         # Knee-jerk exit override
         if p_drop > 0.6:
-            return 'SELL'
+            return "SELL"
 
         # High volatility = more conservative thresholds
         vol_adjustment = 0.0
@@ -147,18 +138,14 @@ class EnsembleScorer:
         sell_threshold = 0.40 - vol_adjustment
 
         if s_final >= buy_threshold:
-            return 'BUY'
+            return "BUY"
         elif s_final <= sell_threshold:
-            return 'SELL'
+            return "SELL"
         else:
-            return 'HOLD'
+            return "HOLD"
 
     def _calculate_confidence(
-            self,
-            p_up: float,
-            p_drop: float,
-            d_ext: float,
-            r_vol: Optional[float]
+        self, p_up: float, p_drop: float, d_ext: float, r_vol: Optional[float]
     ) -> float:
         """
         Calculate confidence in the recommendation
@@ -181,11 +168,7 @@ class EnsembleScorer:
             vol_conf = 0.7  # Default moderate confidence
 
         # Weighted combination
-        confidence = (
-                0.5 * directional_conf +
-                0.25 * extension_conf +
-                0.25 * vol_conf
-        )
+        confidence = 0.5 * directional_conf + 0.25 * extension_conf + 0.25 * vol_conf
 
         return float(confidence)
 

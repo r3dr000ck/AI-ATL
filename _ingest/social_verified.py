@@ -21,10 +21,14 @@ class SocialVerifiedConnector:
 
     # Verified executive accounts (example mapping)
     VERIFIED_EXECUTIVES = {
-        'elonmusk': {'companies': ['TSLA'], 'name': 'Elon Musk', 'verified': True},
-        'tim_cook': {'companies': ['AAPL'], 'name': 'Tim Cook', 'verified': True},
-        'satyanadella': {'companies': ['MSFT'], 'name': 'Satya Nadella', 'verified': True},
-        'nvidia': {'companies': ['NVDA'], 'name': 'NVIDIA Corp', 'verified': True},
+        "elonmusk": {"companies": ["TSLA"], "name": "Elon Musk", "verified": True},
+        "tim_cook": {"companies": ["AAPL"], "name": "Tim Cook", "verified": True},
+        "satyanadella": {
+            "companies": ["MSFT"],
+            "name": "Satya Nadella",
+            "verified": True,
+        },
+        "nvidia": {"companies": ["NVDA"], "name": "NVIDIA Corp", "verified": True},
         # Add more verified accounts
     }
 
@@ -37,9 +41,7 @@ class SocialVerifiedConnector:
         self.session = requests.Session()
 
     def fetch_events(
-            self,
-            since_ts: datetime,
-            handles: Optional[List[str]] = None
+        self, since_ts: datetime, handles: Optional[List[str]] = None
     ) -> List[TextEvent]:
         """
         Fetch verified social posts
@@ -68,9 +70,9 @@ class SocialVerifiedConnector:
                 for post in posts:
                     try:
                         # Parse post
-                        text = post.get('text', '')
-                        post_id = post.get('id', '')
-                        created_at = post.get('created_at')
+                        text = post.get("text", "")
+                        post_id = post.get("id", "")
+                        created_at = post.get("created_at")
 
                         # Parse timestamp
                         try:
@@ -91,7 +93,7 @@ class SocialVerifiedConnector:
 
                         # Extract mentioned tickers (if any)
                         mentioned_tickers = self._extract_tickers(text)
-                        tickers = list(set(exec_info['companies'] + mentioned_tickers))
+                        tickers = list(set(exec_info["companies"] + mentioned_tickers))
 
                         # Create event
                         event = TextEvent(
@@ -106,7 +108,7 @@ class SocialVerifiedConnector:
                             event_type="executive_post",
                             sentiment_raw=sentiment,
                             confidence=0.80,  # Verified accounts, high confidence
-                            novelty=0.90  # Executive posts often novel
+                            novelty=0.90,  # Executive posts often novel
                         )
 
                         events.append(event)
@@ -151,18 +153,35 @@ class SocialVerifiedConnector:
 
         # Keywords indicating market relevance
         relevant_keywords = [
-            'earnings', 'revenue', 'profit', 'sales', 'growth',
-            'product', 'launch', 'announcement', 'acquisition',
-            'partnership', 'expansion', 'guidance', 'forecast',
-            'million', 'billion', 'quarter', 'quarter', 'year',
-            'stock', 'share', 'market', 'investor'
+            "earnings",
+            "revenue",
+            "profit",
+            "sales",
+            "growth",
+            "product",
+            "launch",
+            "announcement",
+            "acquisition",
+            "partnership",
+            "expansion",
+            "guidance",
+            "forecast",
+            "million",
+            "billion",
+            "quarter",
+            "quarter",
+            "year",
+            "stock",
+            "share",
+            "market",
+            "investor",
         ]
 
         return any(keyword in text_lower for keyword in relevant_keywords)
 
     def _extract_tickers(self, text: str) -> List[str]:
         """Extract stock ticker mentions (e.g., $AAPL)"""
-        ticker_pattern = r'\$([A-Z]{1,5})\b'
+        ticker_pattern = r"\$([A-Z]{1,5})\b"
         matches = re.findall(ticker_pattern, text)
         return matches
 
@@ -174,16 +193,34 @@ class SocialVerifiedConnector:
 
         # Positive keywords
         positive = [
-            'great', 'excited', 'amazing', 'record', 'growth',
-            'success', 'proud', 'excellent', 'strong', 'best',
-            'innovation', 'breakthrough', 'milestone'
+            "great",
+            "excited",
+            "amazing",
+            "record",
+            "growth",
+            "success",
+            "proud",
+            "excellent",
+            "strong",
+            "best",
+            "innovation",
+            "breakthrough",
+            "milestone",
         ]
 
         # Negative keywords
         negative = [
-            'concern', 'challenge', 'difficult', 'unfortunately',
-            'decline', 'loss', 'issue', 'problem', 'delay',
-            'sorry', 'apologize'
+            "concern",
+            "challenge",
+            "difficult",
+            "unfortunately",
+            "decline",
+            "loss",
+            "issue",
+            "problem",
+            "delay",
+            "sorry",
+            "apologize",
         ]
 
         pos_count = sum(1 for word in positive if word in text_lower)

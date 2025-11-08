@@ -14,12 +14,12 @@ class PositionSizer:
         self.config = risk_config
 
     def size_position(
-            self,
-            ticker: str,
-            s_final: float,
-            capital: float,
-            current_exposures: Dict[str, float],
-            sector_exposures: Dict[str, float] = None
+        self,
+        ticker: str,
+        s_final: float,
+        capital: float,
+        current_exposures: Dict[str, float],
+        sector_exposures: Dict[str, float] = None,
     ) -> Optional[Allocation]:
         """
         Calculate position size
@@ -62,7 +62,7 @@ class PositionSizer:
                 target_notional=0,
                 target_quantity=0,
                 s_final=s_final,
-                reason="max_total_exposure_reached"
+                reason="max_total_exposure_reached",
             )
 
         target_notional = min(target_notional, available_exposure)
@@ -77,6 +77,5 @@ class PositionSizer:
             target_notional=target_notional,
             target_quantity=0,  # Will be calculated by order manager
             s_final=s_final,
-            reason="normal_entry"
+            reason="normal_entry",
         )
-

@@ -21,16 +21,24 @@ logger = logging.getLogger(__name__)
 
 class ScoreRequest(BaseModel):
     """Score calculation request"""
+
     ticker: str = Field(..., description="Ticker symbol")
-    text: Optional[str] = Field(None, description="Text to analyze (news, filing, post)")
+    text: Optional[str] = Field(
+        None, description="Text to analyze (news, filing, post)"
+    )
     headline: Optional[str] = Field(None, description="Headline")
     source: str = Field("manual", description="Source of information")
-    sentiment: Optional[float] = Field(None, ge=-1, le=1, description="Pre-calculated sentiment")
-    market_data: Optional[Dict[str, Any]] = Field(None, description="Current market data")
+    sentiment: Optional[float] = Field(
+        None, ge=-1, le=1, description="Pre-calculated sentiment"
+    )
+    market_data: Optional[Dict[str, Any]] = Field(
+        None, description="Current market data"
+    )
 
 
 class ScoreResponse(BaseModel):
     """Score calculation response"""
+
     ticker: str
     s_final: float = Field(..., description="Final investment score [0,1]")
     p_up: float = Field(..., description="Upward probability")
@@ -92,10 +100,7 @@ class ScoringService:
                     results.append(score)
                 except Exception as e:
                     logger.error(f"Score failed for {req.ticker}: {e}")
-                    results.append({
-                        "ticker": req.ticker,
-                        "error": str(e)
-                    })
+                    results.append({"ticker": req.ticker, "error": str(e)})
             return {"scores": results}
 
     async def _calculate_score(self, request: ScoreRequest) -> ScoreResponse:
@@ -117,19 +122,15 @@ class ScoringService:
                 event_type="manual",
                 sentiment_raw=request.sentiment or 0.0,
                 confidence=0.7,
-                novelty=0.8
+                novelty=0.8,
             )
 
             text_features = self.text_features.build_features(
-                request.ticker,
-                datetime.now(),
-                [event]
+                request.ticker, datetime.now(), [event]
             )
         else:
             text_features = self.text_features.build_features(
-                request.ticker,
-                datetime.now(),
-                []
+                request.ticker, datetime.now(), []
             )
 
         # Build market features
@@ -137,20 +138,20 @@ class ScoringService:
         if request.market_data:
             # Use provided market data
             market_features = {
-                'return_zscore': request.market_data.get('return_zscore', 0),
-                'rsi': request.market_data.get('rsi', 50),
-                'atr': request.market_data.get('atr', 0),
-                'volume_ratio': request.market_data.get('volume_ratio', 1),
-                'spread_bps': request.market_data.get('spread_bps', 5)
+                "return_zscore": request.market_data.get("return_zscore", 0),
+                "rsi": request.market_data.get("rsi", 50),
+                "atr": request.market_data.get("atr", 0),
+                "volume_ratio": request.market_data.get("volume_ratio", 1),
+                "spread_bps": request.market_data.get("spread_bps", 5),
             }
         else:
             # Use defaults
             market_features = {
-                'return_zscore': 0,
-                'rsi': 50,
-                'atr': 0,
-                'volume_ratio': 1,
-                'spread_bps': 5
+                "return_zscore": 0,
+                "rsi": 50,
+                "atr": 0,
+                "volume_ratio": 1,
+                "spread_bps": 5,
             }
 
         # Combine features
@@ -162,11 +163,9 @@ class ScoringService:
         p_drop = self.p_drop_model.predict(features)
 
         # Get ensemble score
-        ensemble_result = self.ensemble.calculate_final_score(
-            p_up, d_ext, p_drop
-        )
+        ensemble_result = self.ensemble.calculate_final_score(p_up, d_ext, p_drop)
 
-        s_final = ensemble_result['s_final']
+        s_final = ensemble_result["s_final"]
 
         # Determine action
         if s_final >= 0.65:
@@ -177,9 +176,7 @@ class ScoringService:
             action = "HOLD"
 
         # Generate explanation
-        explanation = self._generate_explanation(
-            s_final, p_up, d_ext, p_drop, features
-        )
+        explanation = self._generate_explanation(s_final, p_up, d_ext, p_drop, features)
 
         return ScoreResponse(
             ticker=request.ticker,
@@ -187,20 +184,20 @@ class ScoringService:
             p_up=p_up,
             p_drop=p_drop,
             d_ext=d_ext,
-            expected_move=ensemble_result.get('expected_move'),
+            expected_move=ensemble_result.get("expected_move"),
             action=action,
             confidence=max(p_up, p_drop),
             explanation=explanation,
-            timestamp=datetime.now()
+            timestamp=datetime.now(),
         )
 
     def _generate_explanation(
-            self,
-            s_final: float,
-            p_up: float,
-            d_ext: float,
-            p_drop: float,
-            features: Dict[str, Any]
+        self,
+        s_final: float,
+        p_up: float,
+        d_ext: float,
+        p_drop: float,
+        features: Dict[str, Any],
     ) -> str:
         """Generate human-readable explanation"""
 
@@ -231,13 +228,13 @@ class ScoringService:
             parts.append(f"Elevated downside risk (P_drop={p_drop:.2f}).")
 
         # Sentiment
-        sentiment = features.get('sentiment_weighted', 0)
+        sentiment = features.get("sentiment_weighted", 0)
         if abs(sentiment) > 0.2:
             direction = "positive" if sentiment > 0 else "negative"
             parts.append(f"Sentiment is {direction} ({sentiment:+.2f}).")
 
         # Technical
-        rsi = features.get('rsi', 50)
+        rsi = features.get("rsi", 50)
         if rsi > 70:
             parts.append(f"Overbought (RSI={rsi:.0f}).")
         elif rsi < 30:

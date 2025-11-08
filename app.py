@@ -27,8 +27,7 @@ from .storage.schemas import TextEvent, PriceBar
 
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -56,11 +55,11 @@ class ValueCellTrader:
         # Initialize data connectors
         logger.info("Initializing data connectors...")
         self.connectors = {
-            'edgar': EDGARConnector(),
-            'ir_rss': IRRSSConnector(),
-            'govwatch': GovWatchConnector(),
-            'social': SocialVerifiedConnector(),
-            'macro': MacroFeedsConnector()
+            "edgar": EDGARConnector(),
+            "ir_rss": IRRSSConnector(),
+            "govwatch": GovWatchConnector(),
+            "social": SocialVerifiedConnector(),
+            "macro": MacroFeedsConnector(),
         }
 
         # Initialize services
@@ -116,9 +115,8 @@ class ValueCellTrader:
 
                 # EDGAR filings
                 try:
-                    edgar_events = self.connectors['edgar'].fetch_events(
-                        since_ts,
-                        self.config.universe.tickers
+                    edgar_events = self.connectors["edgar"].fetch_events(
+                        since_ts, self.config.universe.tickers
                     )
                     all_events.extend(edgar_events)
                     logger.info(f"Fetched {len(edgar_events)} EDGAR events")
@@ -127,9 +125,8 @@ class ValueCellTrader:
 
                 # IR RSS
                 try:
-                    ir_events = self.connectors['ir_rss'].fetch_events(
-                        since_ts,
-                        self.config.universe.tickers
+                    ir_events = self.connectors["ir_rss"].fetch_events(
+                        since_ts, self.config.universe.tickers
                     )
                     all_events.extend(ir_events)
                     logger.info(f"Fetched {len(ir_events)} IR events")
@@ -138,7 +135,7 @@ class ValueCellTrader:
 
                 # Government trades
                 try:
-                    gov_events = self.connectors['govwatch'].fetch_events(since_ts)
+                    gov_events = self.connectors["govwatch"].fetch_events(since_ts)
                     all_events.extend(gov_events)
                     logger.info(f"Fetched {len(gov_events)} government trade events")
                 except Exception as e:
@@ -146,7 +143,7 @@ class ValueCellTrader:
 
                 # Social media
                 try:
-                    social_events = self.connectors['social'].fetch_events(since_ts)
+                    social_events = self.connectors["social"].fetch_events(since_ts)
                     all_events.extend(social_events)
                     logger.info(f"Fetched {len(social_events)} social media events")
                 except Exception as e:
@@ -154,7 +151,7 @@ class ValueCellTrader:
 
                 # Macro data
                 try:
-                    macro_events = self.connectors['macro'].fetch_events(since_ts)
+                    macro_events = self.connectors["macro"].fetch_events(since_ts)
                     all_events.extend(macro_events)
                     logger.info(f"Fetched {len(macro_events)} macro events")
                 except Exception as e:
@@ -166,8 +163,7 @@ class ValueCellTrader:
                 # Prune old events (keep last 7 days)
                 cutoff = datetime.now() - timedelta(days=7)
                 self.event_cache = [
-                    e for e in self.event_cache
-                    if e.published_at >= cutoff
+                    e for e in self.event_cache if e.published_at >= cutoff
                 ]
 
                 self.last_fetch_time = datetime.now()
@@ -191,10 +187,7 @@ class ValueCellTrader:
 
                 for ticker in self.config.universe.tickers:
                     # Get ticker-specific events
-                    ticker_events = [
-                        e for e in self.event_cache
-                        if ticker in e.ticker
-                    ]
+                    ticker_events = [e for e in self.event_cache if ticker in e.ticker]
 
                     # Check if we have a position
                     position = self.broker.positions.get(ticker)
@@ -254,8 +247,8 @@ class ValueCellTrader:
                 "services": {
                     "execution": "/execution/docs",
                     "scoring": "/scoring/docs",
-                    "monitor": "/monitor/docs"
-                }
+                    "monitor": "/monitor/docs",
+                },
             }
 
         # Health check
@@ -266,16 +259,11 @@ class ValueCellTrader:
                 "timestamp": datetime.now().isoformat(),
                 "broker_capital": self.broker.get_capital(),
                 "num_positions": len(self.broker.get_positions()),
-                "num_events": len(self.event_cache)
+                "num_events": len(self.event_cache),
             }
 
         # Run server
-        config = uvicorn.Config(
-            app,
-            host="0.0.0.0",
-            port=8000,
-            log_level="info"
-        )
+        config = uvicorn.Config(app, host="0.0.0.0", port=8000, log_level="info")
         server = uvicorn.Server(config)
         await server.serve()
 
@@ -283,4 +271,3 @@ class ValueCellTrader:
         """Stop the trader"""
         logger.info("Stopping trader...")
         self.is_running = False
-
