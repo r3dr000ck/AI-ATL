@@ -143,19 +143,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* AI Status Indicator */}
-        <div className="mb-6 fade-in-up">
-          <AIStatusIndicator
-            status={
-              health?.status === 'healthy'
-                ? 'analyzing'
-                : error
-                ? 'error'
-                : 'idle'
-            }
-          />
-        </div>
-
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8 md:mb-12">
           <MetricCard
@@ -186,44 +173,6 @@ export default function DashboardPage() {
             trend={null}
             animate={animateNumbers}
           />
-        </div>
-
-        {/* Market Overview */}
-        <div className="glass-card rounded-2xl p-6 md:p-8 mb-8 fade-in-up">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold flex items-center gap-3">
-              <span className="text-3xl">📈</span>
-              Market Overview
-            </h2>
-            <span className="text-xs md:text-sm text-[var(--foreground-secondary)]">
-              Simulated intraday movement
-            </span>
-          </div>
-
-          <div className="relative h-32 md:h-40 overflow-hidden rounded-xl bg-[var(--background-secondary)] border border-[var(--border-color)] px-4 py-3 flex items-end gap-1">
-            {Array.from({ length: 40 }).map((_, idx) => {
-              const height =
-                40 + Math.sin(idx / 2) * 20 + (idx % 5) * 4;
-              const clampedHeight = Math.max(10, Math.min(90, height));
-              const opacity = 0.4 + (idx % 5) * 0.1;
-
-              return (
-                <div
-                  key={idx}
-                  className="flex-1 bg-gradient-to-t from-blue-500/40 to-purple-400/70 rounded-t-full"
-                  style={{
-                    height: `${clampedHeight}%`,
-                    opacity,
-                  }}
-                />
-              );
-            })}
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--background)]/80 via-transparent" />
-          </div>
-
-          <p className="mt-4 text-xs md:text-sm text-[var(--foreground-secondary)]">
-            Demo sparkline for the hackathon — you can later connect this to real price data from your backend.
-          </p>
         </div>
 
         {/* Quick Actions */}
@@ -263,9 +212,7 @@ export default function DashboardPage() {
             <span className="text-3xl">💼</span>
             Current Positions
           </h2>
-          {loading ? (
-            <TableSkeleton />
-          ) : positions && positions.positions.length > 0 ? (
+          {positions && positions.positions.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -274,8 +221,8 @@ export default function DashboardPage() {
                     <th className="text-right py-4 px-4 text-[var(--foreground-secondary)] font-semibold text-sm">Quantity</th>
                     <th className="text-right py-4 px-4 text-[var(--foreground-secondary)] font-semibold text-sm">Entry</th>
                     <th className="text-right py-4 px-4 text-[var(--foreground-secondary)] font-semibold text-sm">Current</th>
-                    <th className="text-right py-4 px-4 text-[var(--foreground-secondary)] font-semibold text-sm">P&amp;L</th>
-                    <th className="text-right py-4 px-4 text-[var(--foreground-secondary)] font-semibold text-sm">P&amp;L %</th>
+                    <th className="text-right py-4 px-4 text-[var(--foreground-secondary)] font-semibold text-sm">P&L</th>
+                    <th className="text-right py-4 px-4 text-[var(--foreground-secondary)] font-semibold text-sm">P&L %</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -283,28 +230,17 @@ export default function DashboardPage() {
                     const pnl = position.pnl || 0;
                     const pnlPct = position.pnl_pct || 0;
                     return (
-                      <tr
-                        key={position.ticker}
-                        className="border-b border-[var(--border-color)] hover:bg-[var(--background-tertiary)] transition-colors"
-                      >
+                      <tr key={position.ticker} className="border-b border-[var(--border-color)] hover:bg-[var(--background-tertiary)] transition-colors">
                         <td className="py-4 px-4 font-bold text-lg">{position.ticker}</td>
                         <td className="text-right py-4 px-4">{position.quantity}</td>
                         <td className="text-right py-4 px-4 font-mono">${position.entry_price.toFixed(2)}</td>
                         <td className="text-right py-4 px-4 font-mono">
                           ${position.current_price?.toFixed(2) || '-'}
                         </td>
-                        <td
-                          className={`text-right py-4 px-4 font-bold font-mono ${
-                            pnl >= 0 ? 'text-green-400' : 'text-red-400'
-                          }`}
-                        >
+                        <td className={`text-right py-4 px-4 font-bold font-mono ${pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                           {pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}
                         </td>
-                        <td
-                          className={`text-right py-4 px-4 font-bold font-mono ${
-                            pnlPct >= 0 ? 'text-green-400' : 'text-red-400'
-                          }`}
-                        >
+                        <td className={`text-right py-4 px-4 font-bold font-mono ${pnlPct >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                           {pnlPct >= 0 ? '+' : ''}{pnlPct.toFixed(2)}%
                         </td>
                       </tr>
@@ -321,9 +257,7 @@ export default function DashboardPage() {
             <div className="text-center py-12">
               <div className="text-6xl mb-4">📊</div>
               <p className="text-[var(--foreground-secondary)] text-lg">No active positions</p>
-              <p className="text-sm text-[var(--foreground-secondary)] mt-2">
-                Execute a trade to get started
-              </p>
+              <p className="text-sm text-[var(--foreground-secondary)] mt-2">Execute a trade to get started</p>
             </div>
           )}
         </div>
@@ -354,7 +288,7 @@ function MetricCard({ title, value, icon, trend, animate }: {
   };
 
   return (
-    <div className="glass-card rounded-2xl p-6 card-hover cursor-pointer">
+    <div className="glass-card rounded-2xl p-6 hover:scale-105 transition-transform cursor-pointer">
       <div className="flex items-start justify-between mb-4">
         <div className="text-3xl">{icon}</div>
         {trend && (
@@ -388,103 +322,11 @@ function ActionButton({ href, title, description, icon, color }: {
   return (
     <a
       href={href}
-      className={`block p-6 rounded-xl border border-[var(--border-color)] ${colorClasses[color]} card-hover cursor-pointer`}
+      className={`block p-6 rounded-xl border border-[var(--border-color)] ${colorClasses[color]} transition-all hover:scale-105 cursor-pointer`}
     >
       <div className="text-3xl mb-3">{icon}</div>
       <div className="font-bold text-lg mb-1">{title}</div>
       <div className="text-sm text-[var(--foreground-secondary)]">{description}</div>
     </a>
-  );
-}
-
-// AI Status Indicator Component
-function AIStatusIndicator({ status = 'idle' }: { status?: 'analyzing' | 'executing' | 'idle' | 'error' }) {
-  const statusConfig = {
-    analyzing: {
-      label: 'AI Analyzing Markets',
-      pillClass: 'bg-blue-500/10 border-blue-500/40',
-      dotClass: 'bg-blue-400',
-      barClass: 'bg-blue-500',
-      pulse: true,
-    },
-    executing: {
-      label: 'Executing Trade',
-      pillClass: 'bg-green-500/10 border-green-500/40',
-      dotClass: 'bg-green-400',
-      barClass: 'bg-green-500',
-      pulse: true,
-    },
-    idle: {
-      label: 'AI Ready',
-      pillClass: 'bg-gray-500/10 border-gray-500/40',
-      dotClass: 'bg-gray-400',
-      barClass: 'bg-gray-500',
-      pulse: false,
-    },
-    error: {
-      label: 'Connection Error',
-      pillClass: 'bg-red-500/10 border-red-500/40',
-      dotClass: 'bg-red-400',
-      barClass: 'bg-red-500',
-      pulse: false,
-    },
-  } as const;
-
-  const config = statusConfig[status] || statusConfig.idle;
-
-  return (
-    <div className={`glass-card rounded-2xl p-4 border ${config.pillClass}`}>
-      <div className="flex items-center gap-4">
-        <div className="relative">
-          <div className="w-12 h-12 rounded-xl bg-[var(--background-secondary)] flex items-center justify-center">
-            <span className="text-2xl">🤖</span>
-          </div>
-          {config.pulse && (
-            <div className="absolute inset-0 rounded-xl border-2 border-blue-500/40 animate-ping"></div>
-          )}
-        </div>
-        <div className="flex-1">
-          <div className="font-bold text-sm text-[var(--foreground)]">
-            {config.label}
-          </div>
-          <div className="text-xs text-[var(--foreground-secondary)]">
-            Neural engine monitoring positions in real time.
-          </div>
-        </div>
-        <div className="hidden sm:flex items-end gap-1 h-10">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div
-              key={i}
-              className={`w-1 rounded-full ${config.barClass} animate-pulse`}
-              style={{
-                height: `${i * 4}px`,
-                animationDelay: `${i * 100}ms`,
-              }}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Table Skeleton Component for loading state
-function TableSkeleton() {
-  return (
-    <div className="animate-pulse">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <div
-          key={i}
-          className="flex gap-4 p-4 border-b border-[var(--border-color)] items-center"
-        >
-          <div className="h-4 bg-[var(--background-secondary)] rounded w-20" />
-          <div className="h-4 bg-[var(--background-secondary)] rounded flex-1" />
-          <div className="h-4 bg-[var(--background-secondary)] rounded w-24" />
-          <div className="h-4 bg-[var(--background-secondary)] rounded w-24" />
-          <div className="h-4 bg-[var(--background-secondary)] rounded w-24" />
-          <div className="h-4 bg-[var(--background-secondary)] rounded w-24" />
-        </div>
-      ))}
-    </div>
   );
 }
