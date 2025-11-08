@@ -1,0 +1,16 @@
+.decrypted-text-container {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.decrypted-text {
+  font-family: var(--font-geist-mono), 'Courier New', monospace;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: all 0.3s ease;
+}
+
+.decrypted-text.encrypted {
+  color: rgba(255, 255, 255, 0.5);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
